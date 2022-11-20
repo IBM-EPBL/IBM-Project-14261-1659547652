@@ -1,0 +1,80 @@
+import time
+import sys
+import ibmiotf.application
+import ibmiotf.device
+import random
+#Provide your IBM Watson Device Credentials
+organization = "933n2d"
+deviceType = "koushik47"
+deviceId = "07"
+authMethod = "token"
+authToken = "87654321"
+#api key  {a-illza1-mbdxqo6z0s}
+#api token {zSYzISuAWF&F_x7GkT}
+
+try:
+	deviceOptions = {"org": organization, "type": deviceType, "id": deviceId, "auth-method": authMethod, "auth-token": authToken}
+	deviceCli = ibmiotf.device.Client(deviceOptions)
+	#..............................................
+except Exception as e:
+	print("Caught exception connecting device: %s" % str(e))
+	sys.exit()
+
+# Connect and send a datapoint "hello" with value "world" into the cloud as an event of type "greeting" 10 times
+print("power on ")
+print("checking connection to waston iot...")
+time.sleep(2)
+deviceCli.connect()
+print("dear user ... welcome to IBM-IOT ")
+print("i can provide your children live location and temperature ")
+print()
+name=str(input("enter your child name:"))
+while True:
+        
+        
+        temperature=random.randint(20,85)#random temperature for your child  
+        latitude=random.uniform(12.1295314,12.1335137)#random latitude for your child 
+        longitude=random.uniform(78.1955059,78.1986357)#random longitude for your child
+        a="Child inside the geofence"
+        b=" Child outside the geofence"
+        c="High temperature"
+        d="Low temperature"
+        x={'your_child_zone':a}
+        y={'your_child_zone':b}
+        z={'temp_condition':c}
+        w={'temp_condition':d}
+        
+        
+        
+        data = { 'temp' : temperature, 'lat': latitude,'lon':longitude,'name':name  }
+        #print data
+        def myOnPublishCallback():
+            print ("Published Temperature = %s C" % temperature, "latitude = %s %%" % latitude, "longitude = %s %%" % longitude, "to IBM Watson")
+            print("\n")
+        success = deviceCli.publishEvent("IoTSensorgpsdata", "json", data, qos=0, on_publish=myOnPublishCallback)
+        if latitude>=12.1303598 and latitude<=12.1321095 and longitude >=78.1967589 and longitude <=78.19820833:
+            deviceCli.publishEvent("IoTSensorgpsdata","json",data=x,qos=0,on_publish=myOnPublishCallback)
+            print(x)
+            print("\n")
+        else:
+            deviceCli.publishEvent("IoTSensorgpsdata","json",data=y,qos=0,on_publish=myOnPublishCallback)
+            print(y)
+            print("\n")
+        
+        if (temperature>=40):
+                deviceCli.publishEvent("IoTSensorgpsdata","json",data=z,qos=0,on_publish=myOnPublishCallback)
+                print(z)
+                print("\n")
+        else:
+                deviceCli.publishEvent("IoTSensorgpsdata","json",data=w,qos=0,on_publish=myOnPublishCallback)
+                print(w)
+                print("\n")
+        
+                
+        if not success:
+            print("Not connected to IoTF")
+            print("\n")
+        time.sleep(1)
+
+# Disconnect the device and application from the cloud
+deviceCli.disconnect()
